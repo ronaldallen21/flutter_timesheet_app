@@ -2,14 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Flutter Web",
-      "type": "dart",
-      "request": "launch",
-      "program": "lib/main.dart",
-      "preLaunchTask": "Flutter Clean & Pub Get"
-    },
-    {
-      "name": "Flutter Android",
+      "name": "Flutter Run",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",

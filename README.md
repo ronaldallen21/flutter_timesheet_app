@@ -25,26 +25,21 @@ All data is stored locally using **SQLite**.
 
 ## Getting Started
 
-1. **Install dependencies**:
+### 1. Run and Debug
 
-```bash
-flutter clean
-flutter pub get
-```
+You can run or debug the app directly in **VS Code**:
 
-2. **Run on Web**:
+- Select the **target device** (Android, Web, or any connected device) in the device dropdown.
+- Press **Run** and **Debug**.
 
-```bash
-flutter run -d chrome
-```
+VS Code will automatically handle:
 
-3. **Run on Android**:
+- Cleaning the project
+- Fetching dependencies (`flutter pub get`)
 
-```bash
-flutter run -d android
-```
+### 2. Build the Application
 
-4. **Build APK (debug)**:
+To build the app for Android or Web, run:
 
 ```bash
 ./rebuild.sh
