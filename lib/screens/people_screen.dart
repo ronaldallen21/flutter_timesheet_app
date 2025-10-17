@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../providers/people_provider.dart';
 
 class PeopleScreen extends StatelessWidget {
+  const PeopleScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final peopleProvider = Provider.of<PeopleProvider>(context);

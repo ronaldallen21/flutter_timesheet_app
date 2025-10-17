@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_timesheet_app/services/task_service.dart';
 import '../models/task.dart';
-import '../services/database_service.dart';
 
 class TasksProvider extends ChangeNotifier {
   List<Task> _tasks = [];
-  final DatabaseService _dbService = DatabaseService();
+  final TasksService _tasksService = TasksService();
 
   List<Task> get tasks => _tasks;
 
@@ -13,7 +13,7 @@ class TasksProvider extends ChangeNotifier {
   }
 
   Future<void> fetchTasks() async {
-    _tasks = await _dbService.getTasks();
+    _tasks = await _tasksService.getTasks();
     notifyListeners();
   }
 

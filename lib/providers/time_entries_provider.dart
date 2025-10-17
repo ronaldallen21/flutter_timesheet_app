@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_timesheet_app/services/time_entries_service.dart';
 import '../models/time_entry.dart';
-import '../services/database_service.dart';
 
 class TimeEntriesProvider extends ChangeNotifier {
   List<TimeEntry> _timeEntries = [];
-  final DatabaseService _dbService = DatabaseService();
+  final TimeEntriesService _timeEntriesService = TimeEntriesService();
 
   List<TimeEntry> get timeEntries => _timeEntries;
 
@@ -13,31 +13,29 @@ class TimeEntriesProvider extends ChangeNotifier {
   }
 
   Future<void> fetchTimeEntries() async {
-    _timeEntries = await _dbService.getTimeEntries();
+    _timeEntries = await _timeEntriesService.getTimeEntries();
     notifyListeners();
   }
 
   Future<void> addTimeEntry(TimeEntry entry) async {
-    await _dbService.insertTimeEntry(entry);
+    await _timeEntriesService.addTimeEntry(entry);
     await fetchTimeEntries();
   }
 
   Future<void> updateTimeEntry(TimeEntry entry) async {
-    await _dbService.updateTimeEntry(entry);
+    await _timeEntriesService.updateTimeEntry(entry);
     await fetchTimeEntries();
   }
 
   Future<void> deleteTimeEntry(int id) async {
-    await _dbService.deleteTimeEntry(id);
+    await _timeEntriesService.deleteTimeEntry(id);
     await fetchTimeEntries();
   }
 
-  // Optional: filter by person
   List<TimeEntry> filterByPerson(int personId) {
     return _timeEntries.where((e) => e.personId == personId).toList();
   }
 
-  // Optional: filter by date
   List<TimeEntry> filterByDate(DateTime date) {
     return _timeEntries
         .where(

@@ -7,11 +7,13 @@ import '../models/time_entry.dart';
 import 'time_entry_form_screen.dart';
 
 class TimeEntryScreen extends StatefulWidget {
+  const TimeEntryScreen({super.key});
+
   @override
-  _TimeEntryScreenState createState() => _TimeEntryScreenState();
+  TimeEntryScreenState createState() => TimeEntryScreenState();
 }
 
-class _TimeEntryScreenState extends State<TimeEntryScreen> {
+class TimeEntryScreenState extends State<TimeEntryScreen> {
   int? _selectedPersonId;
   DateTime? _selectedDate;
 
@@ -21,7 +23,6 @@ class _TimeEntryScreenState extends State<TimeEntryScreen> {
     final peopleProvider = Provider.of<PeopleProvider>(context);
     final tasksProvider = Provider.of<TasksProvider>(context);
 
-    // Apply filtering
     List<TimeEntry> filteredEntries = timeProvider.timeEntries;
     if (_selectedPersonId != null) {
       filteredEntries = filteredEntries
@@ -43,12 +44,10 @@ class _TimeEntryScreenState extends State<TimeEntryScreen> {
       appBar: AppBar(title: Text('Time Entries')),
       body: Column(
         children: [
-          // Filter Row
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               children: [
-                // Person Filter Dropdown
                 Expanded(
                   child: DropdownButton<int>(
                     hint: Text('Filter by Person'),
@@ -74,14 +73,13 @@ class _TimeEntryScreenState extends State<TimeEntryScreen> {
                   ),
                 ),
                 SizedBox(width: 8),
-                // Date Filter
                 ElevatedButton(
+                  onPressed: _pickFilterDate,
                   child: Text(
                     _selectedDate == null
                         ? 'All Dates'
                         : _selectedDate!.toLocal().toString().split(' ')[0],
                   ),
-                  onPressed: _pickFilterDate,
                 ),
                 SizedBox(width: 8),
                 if (_selectedDate != null)
@@ -93,8 +91,6 @@ class _TimeEntryScreenState extends State<TimeEntryScreen> {
             ),
           ),
           Divider(height: 1),
-
-          // Entries List
           Expanded(
             child: ListView.builder(
               itemCount: filteredEntries.length,
@@ -129,9 +125,11 @@ class _TimeEntryScreenState extends State<TimeEntryScreen> {
                           icon: Icon(Icons.delete),
                           onPressed: () async {
                             await timeProvider.deleteTimeEntry(entry.id!);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Time entry deleted')),
-                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Time entry deleted')),
+                              );
+                            }
                           },
                         ),
                       ],

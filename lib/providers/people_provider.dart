@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_timesheet_app/services/people_service.dart';
 import '../models/person.dart';
-import '../services/database_service.dart';
 
 class PeopleProvider extends ChangeNotifier {
   List<Person> _people = [];
-  final DatabaseService _dbService = DatabaseService();
+  final PeopleService _peopleService = PeopleService();
 
   List<Person> get people => _people;
 
@@ -13,7 +13,7 @@ class PeopleProvider extends ChangeNotifier {
   }
 
   Future<void> fetchPeople() async {
-    _people = await _dbService.getPeople();
+    _people = await _peopleService.getPeople();
     notifyListeners();
   }
 

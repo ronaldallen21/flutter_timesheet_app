@@ -6,15 +6,15 @@ import '../providers/tasks_provider.dart';
 import '../providers/time_entries_provider.dart';
 
 class TimeEntryFormScreen extends StatefulWidget {
-  final TimeEntry? entry; // null for Add, non-null for Edit
+  final TimeEntry? entry;
 
-  const TimeEntryFormScreen({Key? key, this.entry}) : super(key: key);
+  const TimeEntryFormScreen({super.key, this.entry});
 
   @override
-  _TimeEntryFormScreenState createState() => _TimeEntryFormScreenState();
+  TimeEntryFormScreenState createState() => TimeEntryFormScreenState();
 }
 
-class _TimeEntryFormScreenState extends State<TimeEntryFormScreen> {
+class TimeEntryFormScreenState extends State<TimeEntryFormScreen> {
   final _formKey = GlobalKey<FormState>();
   int? _selectedPersonId;
   int? _selectedTaskId;
@@ -54,9 +54,8 @@ class _TimeEntryFormScreenState extends State<TimeEntryFormScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              // Person Dropdown
               DropdownButtonFormField<int>(
-                value: _selectedPersonId,
+                initialValue: _selectedPersonId,
                 decoration: InputDecoration(labelText: 'Person'),
                 items: peopleProvider.people
                     .map(
@@ -73,9 +72,8 @@ class _TimeEntryFormScreenState extends State<TimeEntryFormScreen> {
 
               SizedBox(height: 16),
 
-              // Task Dropdown
               DropdownButtonFormField<int>(
-                value: _selectedTaskId,
+                initialValue: _selectedTaskId,
                 decoration: InputDecoration(labelText: 'Task'),
                 items: tasksProvider.tasks
                     .map(
@@ -88,7 +86,6 @@ class _TimeEntryFormScreenState extends State<TimeEntryFormScreen> {
 
               SizedBox(height: 16),
 
-              // Date Picker
               ListTile(
                 title: Text(
                   'Date: ${_selectedDate.toLocal().toString().split(' ')[0]}',
@@ -99,7 +96,6 @@ class _TimeEntryFormScreenState extends State<TimeEntryFormScreen> {
 
               SizedBox(height: 16),
 
-              // Start Time Picker
               ListTile(
                 title: Text(
                   'Start Time: ${_startTime?.format(context) ?? 'Select'}',
@@ -110,7 +106,6 @@ class _TimeEntryFormScreenState extends State<TimeEntryFormScreen> {
 
               SizedBox(height: 16),
 
-              // End Time Picker
               ListTile(
                 title: Text(
                   'End Time: ${_endTime?.format(context) ?? 'Select'}',
@@ -121,7 +116,6 @@ class _TimeEntryFormScreenState extends State<TimeEntryFormScreen> {
 
               SizedBox(height: 16),
 
-              // Notes
               TextFormField(
                 initialValue: _notes,
                 decoration: InputDecoration(labelText: 'Notes (Optional)'),
@@ -131,7 +125,6 @@ class _TimeEntryFormScreenState extends State<TimeEntryFormScreen> {
 
               SizedBox(height: 24),
 
-              // Submit Button
               ElevatedButton(
                 child: Text(
                   widget.entry == null ? 'Add Entry' : 'Update Entry',
@@ -182,19 +175,21 @@ class _TimeEntryFormScreenState extends State<TimeEntryFormScreen> {
                       notes: _notes,
                     );
 
+                    String message;
                     if (widget.entry == null) {
                       await timeProvider.addTimeEntry(entry);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Time entry added')),
-                      );
+                      message = 'Time entry added';
                     } else {
                       await timeProvider.updateTimeEntry(entry);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Time entry updated')),
-                      );
+                      message = 'Time entry updated';
                     }
 
-                    Navigator.pop(context);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(message)));
+                      Navigator.pop(context);
+                    }
                   }
                 },
               ),
