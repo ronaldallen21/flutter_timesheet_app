@@ -1,30 +1,59 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:flutter_timesheet_app/main.dart';
+import 'package:flutter_timesheet_app/models/time_entry.dart';
+import 'package:flutter_timesheet_app/providers/time_entries_provider.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('TimeEntriesProvider Tests', () {
+    late TimeEntriesProvider provider;
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    setUp(() {
+      provider = TimeEntriesProvider();
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('Add a time entry', () {
+      final entry = TimeEntry(
+        id: 1,
+        personId: 1,
+        taskId: 1,
+        date: DateTime(2025, 10, 17),
+        startTime: DateTime(2025, 10, 17, 9, 0),
+        endTime: DateTime(2025, 10, 17, 10, 0),
+        notes: 'Test entry',
+      );
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      provider.addTimeEntry(entry);
+
+      expect(provider.timeEntries.length, 1);
+      expect(provider.timeEntries.first.notes, 'Test entry');
+    });
+
+    test('Update a time entry', () {
+      final entry = TimeEntry(
+        id: 1,
+        personId: 1,
+        taskId: 1,
+        date: DateTime(2025, 10, 17),
+        startTime: DateTime(2025, 10, 17, 9, 0),
+        endTime: DateTime(2025, 10, 17, 10, 0),
+        notes: 'Test entry',
+      );
+      provider.addTimeEntry(entry);
+
+      final updatedEntry = TimeEntry(
+        id: 1,
+        personId: 1,
+        taskId: 1,
+        date: DateTime(2025, 10, 17),
+        startTime: DateTime(2025, 10, 17, 9, 30),
+        endTime: DateTime(2025, 10, 17, 10, 30),
+        notes: 'Updated entry',
+      );
+
+      provider.updateTimeEntry(updatedEntry);
+
+      expect(provider.timeEntries.first.notes, 'Updated entry');
+      expect(provider.timeEntries.first.startTime.hour, 9);
+      expect(provider.timeEntries.first.startTime.minute, 30);
+    });
   });
 }
