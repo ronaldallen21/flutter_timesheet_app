@@ -1,5 +1,9 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+
+// Web-specific import
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 
 class DatabaseService {
   static final DatabaseService _instance = DatabaseService._internal();
@@ -15,10 +19,20 @@ class DatabaseService {
   }
 
   Future<Database> _initDB() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'timesheet.db');
-
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    if (kIsWeb) {
+      // Initialize web database factory
+      databaseFactory = databaseFactoryFfiWeb;
+      // For web, path can just be the database name
+      return await databaseFactory.openDatabase(
+        'timesheet.db',
+        options: OpenDatabaseOptions(version: 1, onCreate: _createDB),
+      );
+    } else {
+      // Mobile/desktop
+      final dbPath = await getDatabasesPath();
+      final path = join(dbPath, 'timesheet.db');
+      return await openDatabase(path, version: 1, onCreate: _createDB);
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
@@ -51,6 +65,7 @@ class DatabaseService {
       )
     ''');
 
+    // Seed data
     await db.insert('people', {'fullName': 'John Doe'});
     await db.insert('people', {'fullName': 'Jane Smith'});
     await db.insert('tasks', {
