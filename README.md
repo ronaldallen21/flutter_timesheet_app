@@ -39,8 +39,16 @@ VS Code will automatically handle:
 
 ### 2. Build the Application
 
-To build the app for Android or Web, run:
+To build the app for Android and Web, run:
 
 ```bash
 ./rebuild.sh
+```
+
+### 2. Test Widget
+
+To test widget, run:
+
+```bash
+flutter test
 ```

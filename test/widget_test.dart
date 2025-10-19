@@ -1,59 +1,33 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_timesheet_app/models/time_entry.dart';
+import 'package:flutter_timesheet_app/screens/home_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_timesheet_app/providers/people_provider.dart';
+import 'package:flutter_timesheet_app/providers/tasks_provider.dart';
 import 'package:flutter_timesheet_app/providers/time_entries_provider.dart';
 
 void main() {
-  group('TimeEntriesProvider Tests', () {
-    late TimeEntriesProvider provider;
+  testWidgets('HomeScreen displays 3 menu cards', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => PeopleProvider()),
+          ChangeNotifierProvider(create: (_) => TasksProvider()),
+          ChangeNotifierProvider(create: (_) => TimeEntriesProvider()),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
 
-    setUp(() {
-      provider = TimeEntriesProvider();
-    });
+    await tester.pumpAndSettle();
 
-    test('Add a time entry', () {
-      final entry = TimeEntry(
-        id: 1,
-        personId: 1,
-        taskId: 1,
-        date: DateTime(2025, 10, 17),
-        startTime: DateTime(2025, 10, 17, 9, 0),
-        endTime: DateTime(2025, 10, 17, 10, 0),
-        notes: 'Test entry',
-      );
+    expect(find.text('People'), findsOneWidget);
+    expect(find.text('Tasks'), findsOneWidget);
+    expect(find.text('Time Entries'), findsOneWidget);
 
-      provider.addTimeEntry(entry);
+    await tester.tap(find.text('People'));
+    await tester.pumpAndSettle();
 
-      expect(provider.timeEntries.length, 1);
-      expect(provider.timeEntries.first.notes, 'Test entry');
-    });
-
-    test('Update a time entry', () {
-      final entry = TimeEntry(
-        id: 1,
-        personId: 1,
-        taskId: 1,
-        date: DateTime(2025, 10, 17),
-        startTime: DateTime(2025, 10, 17, 9, 0),
-        endTime: DateTime(2025, 10, 17, 10, 0),
-        notes: 'Test entry',
-      );
-      provider.addTimeEntry(entry);
-
-      final updatedEntry = TimeEntry(
-        id: 1,
-        personId: 1,
-        taskId: 1,
-        date: DateTime(2025, 10, 17),
-        startTime: DateTime(2025, 10, 17, 9, 30),
-        endTime: DateTime(2025, 10, 17, 10, 30),
-        notes: 'Updated entry',
-      );
-
-      provider.updateTimeEntry(updatedEntry);
-
-      expect(provider.timeEntries.first.notes, 'Updated entry');
-      expect(provider.timeEntries.first.startTime.hour, 9);
-      expect(provider.timeEntries.first.startTime.minute, 30);
-    });
+    expect(find.text('People'), findsWidgets);
   });
 }

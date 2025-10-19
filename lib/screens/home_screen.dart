@@ -8,30 +8,63 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width > 600;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Flutter Timesheet App')),
+      appBar: AppBar(title: const Text('Flutter Timesheet App')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
+        child: GridView.count(
+          crossAxisCount: isWide ? 3 : 1,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
           children: [
-            _buildMenuButton(context, 'People', PeopleScreen()),
-            _buildMenuButton(context, 'Tasks', TasksScreen()),
-            _buildMenuButton(context, 'Time Entries', TimeEntryScreen()),
+            _buildMenuCard(
+              context,
+              'People',
+              Icons.person,
+              const PeopleScreen(),
+            ),
+            _buildMenuCard(context, 'Tasks', Icons.task, const TasksScreen()),
+            _buildMenuCard(
+              context,
+              'Time Entries',
+              Icons.access_time,
+              const TimeEntryScreen(),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMenuButton(BuildContext context, String title, Widget screen) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: ElevatedButton(
-        onPressed: () =>
+  Widget _buildMenuCard(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Widget screen,
+  ) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell(
+        onTap: () =>
             Navigator.push(context, MaterialPageRoute(builder: (_) => screen)),
-        child: SizedBox(
-          width: double.infinity,
-          child: Center(child: Text(title)),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 48, color: Theme.of(context).primaryColor),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

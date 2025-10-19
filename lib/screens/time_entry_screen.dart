@@ -22,6 +22,7 @@ class TimeEntryScreenState extends State<TimeEntryScreen> {
     final timeProvider = Provider.of<TimeEntriesProvider>(context);
     final peopleProvider = Provider.of<PeopleProvider>(context);
     final tasksProvider = Provider.of<TasksProvider>(context);
+    final isWide = MediaQuery.of(context).size.width > 600;
 
     List<TimeEntry> filteredEntries = timeProvider.timeEntries;
     if (_selectedPersonId != null) {
@@ -41,38 +42,32 @@ class TimeEntryScreenState extends State<TimeEntryScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text('Time Entries')),
+      appBar: AppBar(title: const Text('Time Entries')),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Row(
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
-                Expanded(
-                  child: DropdownButton<int>(
-                    hint: Text('Filter by Person'),
-                    value: _selectedPersonId,
-                    isExpanded: true,
-                    items: [
-                      DropdownMenuItem<int>(
-                        value: null,
-                        child: Text('All People'),
+                DropdownButton<int>(
+                  hint: const Text('Filter by Person'),
+                  value: _selectedPersonId,
+                  items: [
+                    const DropdownMenuItem<int>(
+                      value: null,
+                      child: Text('All People'),
+                    ),
+                    ...peopleProvider.people.map(
+                      (p) => DropdownMenuItem(
+                        value: p.id,
+                        child: Text(p.fullName),
                       ),
-                      ...peopleProvider.people.map(
-                        (p) => DropdownMenuItem(
-                          value: p.id,
-                          child: Text(p.fullName),
-                        ),
-                      ),
-                    ],
-                    onChanged: (val) {
-                      setState(() {
-                        _selectedPersonId = val;
-                      });
-                    },
-                  ),
+                    ),
+                  ],
+                  onChanged: (val) => setState(() => _selectedPersonId = val),
                 ),
-                SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _pickFilterDate,
                   child: Text(
@@ -81,71 +76,115 @@ class TimeEntryScreenState extends State<TimeEntryScreen> {
                         : _selectedDate!.toLocal().toString().split(' ')[0],
                   ),
                 ),
-                SizedBox(width: 8),
                 if (_selectedDate != null)
                   IconButton(
-                    icon: Icon(Icons.clear),
+                    icon: const Icon(Icons.clear),
                     onPressed: () => setState(() => _selectedDate = null),
                   ),
               ],
             ),
           ),
-          Divider(height: 1),
+          const Divider(height: 1),
           Expanded(
-            child: ListView.builder(
-              itemCount: filteredEntries.length,
-              itemBuilder: (context, index) {
-                final entry = filteredEntries[index];
-                final person = peopleProvider.getPersonById(entry.personId);
-                final task = tasksProvider.getTaskById(entry.taskId);
-
-                return Card(
-                  margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  child: ListTile(
-                    title: Text('${person?.fullName} - ${task?.name}'),
-                    subtitle: Text(
-                      'Date: ${entry.date.toLocal().toString().split(' ')[0]}\n'
-                      'Time: ${entry.startTime.hour}:${entry.startTime.minute} - ${entry.endTime.hour}:${entry.endTime.minute}\n'
-                      'Notes: ${entry.notes ?? ''}',
-                    ),
-                    isThreeLine: true,
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.edit),
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => TimeEntryFormScreen(entry: entry),
-                            ),
-                          ),
+            child: isWide
+                ? GridView.builder(
+                    padding: const EdgeInsets.all(8),
+                    gridDelegate:
+                        const SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: 600,
+                          childAspectRatio: 3,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
                         ),
-                        IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () async {
-                            await timeProvider.deleteTimeEntry(entry.id!);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Time entry deleted')),
-                              );
-                            }
-                          },
-                        ),
-                      ],
-                    ),
+                    itemCount: filteredEntries.length,
+                    itemBuilder: (context, index) {
+                      final entry = filteredEntries[index];
+                      final person = peopleProvider.getPersonById(
+                        entry.personId,
+                      );
+                      final task = tasksProvider.getTaskById(entry.taskId);
+                      return _buildEntryCard(
+                        context,
+                        entry,
+                        person?.fullName ?? '',
+                        task?.name ?? '',
+                      );
+                    },
+                  )
+                : ListView.builder(
+                    itemCount: filteredEntries.length,
+                    itemBuilder: (context, index) {
+                      final entry = filteredEntries[index];
+                      final person = peopleProvider.getPersonById(
+                        entry.personId,
+                      );
+                      final task = tasksProvider.getTaskById(entry.taskId);
+                      return _buildEntryCard(
+                        context,
+                        entry,
+                        person?.fullName ?? '',
+                        task?.name ?? '',
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
+        tooltip: 'Add Time Entry',
+        child: const Icon(Icons.add),
         onPressed: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => TimeEntryFormScreen()),
+          MaterialPageRoute(builder: (_) => const TimeEntryFormScreen()),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEntryCard(
+    BuildContext context,
+    TimeEntry entry,
+    String personName,
+    String taskName,
+  ) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: ListTile(
+        title: Text('$personName - $taskName'),
+        subtitle: Text(
+          'Date: ${entry.date.toLocal().toString().split(' ')[0]}\n'
+          'Time: ${TimeOfDay.fromDateTime(entry.startTime).format(context)} - ${TimeOfDay.fromDateTime(entry.endTime).format(context)}\n'
+          'Notes: ${entry.notes ?? ''}',
+        ),
+        isThreeLine: true,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => TimeEntryFormScreen(entry: entry),
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () async {
+                final provider = Provider.of<TimeEntriesProvider>(
+                  context,
+                  listen: false,
+                );
+                await provider.deleteTimeEntry(entry.id!);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Time entry deleted')),
+                  );
+                }
+              },
+            ),
+          ],
         ),
       ),
     );
