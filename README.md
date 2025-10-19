@@ -19,7 +19,7 @@ All data is stored locally using **SQLite**.
 
 - **Models:** `Person`, `Task`, `TimeEntry`
 - **Providers:** `PeopleProvider`, `TasksProvider`, `TimeEntriesProvider`
-- **Services:** `DatabaseService`, `PeopleService`, `TaskService`, , `TimeEntriesService` for SQLite CRUD
+- **Services:** `DatabaseService`, `PeopleService`, `TasksService`, `TimeEntriesService` for SQLite CRUD
 - **Screens:** Home, People, Tasks, TimeEntry (Add/Edit)
 - **Utils/Widgets:** reusable input fields and date/time formatting
 
