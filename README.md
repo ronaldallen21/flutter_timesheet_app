@@ -45,7 +45,7 @@ To build the app for Android and Web, run:
 ./rebuild.sh
 ```
 
-### 2. Test Widget
+### 3. Test Widget
 
 To test widget, run:
 
